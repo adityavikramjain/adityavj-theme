@@ -5,6 +5,50 @@
 get_header(); ?>
 
 <div class="lab-container">
+    <div class="lab-container">
+    
+    <div class="terminal-header">
+        <span class="terminal-text">&gt; adityavj.com</span><span class="cursor">_</span>
+    </div>
+
+    <div class="lab-hero">
+        ```
+
+### 2. Update `style.css`
+*Add the CSS to make it blink and look like code.*
+
+Add this to the bottom of your `style.css` file:
+
+```css
+/* --- TERMINAL HEADER --- */
+.terminal-header {
+    font-family: 'Space Grotesk', monospace; /* Monospace for the tech feel */
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--charcoal);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.terminal-text {
+    color: var(--charcoal);
+    letter-spacing: -0.02em;
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1.2em;
+    background-color: var(--electric-orange); /* The electric orange block */
+    margin-left: 5px;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
     <div class="lab-hero">
         <div class="hero-text">
             <h1 class="hero-name">Aditya V Jain</h1>
