@@ -1,13 +1,25 @@
 /*
 Theme Name: Aditya VJ Lab Theme
 Template: astra
-Version: 1.4.0
+Version: 1.5.0
 Description: A child theme for the Electric Lab design.
 */
 
-/* --- FIX 1: HIDE DEFAULT ASTRA HEADER (Removes Duplicate) --- */
-.site-header, .ast-main-header-bar-alignment {
+/* --- FIX 1: HIDE ALL ASTRA HEADERS (NUCLEAR OPTION) --- */
+header.site-header,
+.ast-main-header-wrap,
+.main-header-bar,
+.ast-primary-header-bar,
+.site-branding,
+.ast-site-identity,
+.site-title {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
 }
 
 /* --- ELECTRIC LAB VARIABLES --- */
@@ -30,7 +42,7 @@ Description: A child theme for the Electric Lab design.
         radial-gradient(circle at 20% 80%, rgba(255, 69, 0, 0.06) 0%, transparent 40%),
         radial-gradient(circle at 80% 20%, rgba(255, 69, 0, 0.04) 0%, transparent 40%),
         var(--mist-rose);
-    padding: 60px 20px; /* Restored original padding */
+    padding: 60px 20px;
     max-width: 1280px;
     margin: 0 auto;
     min-height: 100vh;
@@ -39,11 +51,11 @@ Description: A child theme for the Electric Lab design.
 
 * { box-sizing: border-box; }
 
-/* --- TERMINAL HEADER (Restored Original Look) --- */
+/* --- TERMINAL HEADER (Restored Original Look with Underscore Cursor) --- */
 .terminal-header {
     font-family: 'Space Grotesk', 'Courier New', monospace;
     font-weight: 700;
-    font-size: 1.25rem; /* Increased size to match original */
+    font-size: 1.1rem; /* Match original size */
     color: var(--charcoal);
     margin-bottom: 20px;
     display: flex;
@@ -58,12 +70,17 @@ Description: A child theme for the Electric Lab design.
 
 .cursor {
     display: inline-block;
-    width: 12px;
-    height: 1.4em;
-    background-color: var(--electric-orange);
-    margin-left: 6px;
+    /* Removed fixed width/height/background for block cursor */
+    color: var(--electric-orange); /* Color the underscore orange */
+    font-weight: bold;
+    margin-left: 2px; /* Adjust spacing slightly */
     animation: blinkCursor 1s step-end infinite;
 }
+/* Add the underscore content via CSS if not in HTML, or rely on HTML content */
+.cursor::after {
+    content: "_"; 
+}
+
 
 @keyframes blinkCursor {
     0%, 100% { opacity: 1; }
@@ -215,6 +232,7 @@ p { line-height: 1.6; color: var(--soft-grey); }
 /* --- ANIMATIONS & RESPONSIVE --- */
 @keyframes morphMain { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 33% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; } 66% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; } }
 @keyframes morphGhost { 0% { transform: rotate(0deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 100% { transform: rotate(360deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 @keyframes blurInUp { from { opacity: 0; transform: translateY(25px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 @keyframes staggerFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
