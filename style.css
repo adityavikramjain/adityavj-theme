@@ -1,11 +1,28 @@
 /*
 Theme Name: Aditya VJ Lab Theme
 Template: astra
-Version: 1.6.0
+Version: 2.0.0 (Final Production)
 Description: A child theme for the Electric Lab design.
 */
 
-/* --- ELECTRIC LAB VARIABLES --- */
+/* --- FIX 1: NUCLEAR OPTION FOR DEFAULT HEADERS --- */
+header.site-header,
+.ast-main-header-wrap,
+.main-header-bar,
+.ast-primary-header-bar,
+.site-branding,
+.ast-site-identity,
+.site-title {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+}
+
+/* --- VARIABLES --- */
 :root {
     --electric-orange: #FF4500;
     --mist-rose: #FFF5F2;
@@ -17,7 +34,7 @@ Description: A child theme for the Electric Lab design.
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- GLOBAL LAYOUT --- */
+/* --- LAYOUT --- */
 .lab-container {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--charcoal);
@@ -47,11 +64,9 @@ Description: A child theme for the Electric Lab design.
     padding-top: 10px;
 }
 
-.terminal-text {
-    letter-spacing: -0.02em;
-}
+.terminal-text { letter-spacing: -0.02em; }
 
-/* THE UNDERSCORE CURSOR FIX */
+/* The blinking orange underscore */
 .cursor {
     display: inline-block;
     color: var(--electric-orange);
@@ -60,16 +75,9 @@ Description: A child theme for the Electric Lab design.
     animation: blinkCursor 1s step-end infinite;
     line-height: 1;
 }
+.cursor::after { content: "_"; }
 
-/* Use the content property to force an underscore */
-.cursor::after {
-    content: "_";
-}
-
-@keyframes blinkCursor {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
+@keyframes blinkCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 /* --- TYPOGRAPHY --- */
 h1, h2, h3 { 
@@ -79,7 +87,7 @@ h1, h2, h3 {
 }
 p { line-height: 1.6; color: var(--soft-grey); }
 
-/* --- HERO SECTION --- */
+/* --- HERO --- */
 .lab-hero {
     display: flex; align-items: center; justify-content: space-between;
     gap: 60px; margin-bottom: 80px; padding: 20px 0 60px 0; min-height: 500px;
@@ -96,14 +104,15 @@ p { line-height: 1.6; color: var(--soft-grey); }
 }
 .hero-tagline strong { color: var(--charcoal); display: block; margin-top: 10px; font-size: 1.25rem; }
 
-/* --- HERO VISUAL --- */
+/* --- VISUAL (FIXED HTTPS) --- */
 .hero-visual {
     flex: 0 1 40%; display: flex; justify-content: center; align-items: center;
     opacity: 0; animation: fadeInRight 1s var(--ease-smooth) 0.3s forwards;
 }
 .flux-blob {
     width: 400px; height: 400px; position: relative;
-    background-image: url('http://adityavj.com/wp-content/uploads/2025/11/1758735414614-1.png');
+    /* FIXED: HTTPS protocol */
+    background-image: url('https://adityavj.com/wp-content/uploads/2025/11/1758735414614-1.png');
     background-size: cover; background-position: center top 30%;
     border: 4px solid var(--charcoal); 
     border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
@@ -216,7 +225,7 @@ p { line-height: 1.6; color: var(--soft-grey); }
 /* --- ANIMATIONS & RESPONSIVE --- */
 @keyframes morphMain { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 33% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; } 66% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; } }
 @keyframes morphGhost { 0% { transform: rotate(0deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 100% { transform: rotate(360deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } }
-@keyframes blinkCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 @keyframes blurInUp { from { opacity: 0; transform: translateY(25px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 @keyframes staggerFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
