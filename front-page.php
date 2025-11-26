@@ -95,11 +95,25 @@ get_header(); ?>
             modalTitle.textContent = title;
 
             if (modalType === 'prompt') {
-                // Show prompt text with copy button
-                const promptText = this.getAttribute('data-prompt-text');
+                // Show prompt text with copy button - read from hidden div
+                const promptId = this.getAttribute('data-prompt-id');
+                const promptDiv = document.getElementById(promptId);
+                if (!promptDiv) {
+                    console.error('Prompt storage not found:', promptId);
+                    return;
+                }
+                const promptText = promptDiv.textContent;
                 modalBody.innerHTML = '<pre>' + escapeHtml(promptText) + '</pre>';
-                modalFooter.innerHTML = '<button class="copy-button" onclick="copyToClipboard(\'' +
-                    escapeForJs(promptText) + '\')">📋 Copy Prompt</button>';
+
+                // Store prompt text in a way that's safe for the copy button
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-button';
+                copyBtn.textContent = '📋 Copy Prompt';
+                copyBtn.addEventListener('click', function() {
+                    copyToClipboard(promptText);
+                });
+                modalFooter.innerHTML = '';
+                modalFooter.appendChild(copyBtn);
             } else if (modalType === 'gem') {
                 // Show gem description with link
                 const gemLink = this.getAttribute('data-gem-link');
@@ -168,16 +182,6 @@ get_header(); ?>
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    // JS escape utility for onclick attributes
-    function escapeForJs(text) {
-        return text
-            .replace(/\\/g, '\\\\')
-            .replace(/'/g, "\\'")
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r');
     }
 })();
 </script>

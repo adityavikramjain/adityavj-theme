@@ -58,7 +58,9 @@ add_shortcode('resource_grid', function() {
     if (empty($data['resources'])) return '<p>No resources found.</p>';
 
     $output = '<div class="course-grid">';
-    foreach ($data['resources'] as $res) {
+    $prompt_storage = ''; // Hidden divs to store long prompt texts
+
+    foreach ($data['resources'] as $index => $res) {
 
         $icon = '💎';
         if ($res['type'] === 'Gemini Gem') { $icon = '💎'; }
@@ -68,9 +70,10 @@ add_shortcode('resource_grid', function() {
         // Build data attributes for modal
         $data_attrs = '';
         if (!empty($res['prompt_text'])) {
-            // Resource with prompt - modal will show prompt text
-            $escaped_prompt = htmlspecialchars($res['prompt_text'], ENT_QUOTES, 'UTF-8');
-            $data_attrs = 'data-modal="prompt" data-prompt-text="' . $escaped_prompt . '" data-title="' . esc_attr($res['title']) . '"';
+            // Resource with prompt - store in hidden div and reference by ID
+            $prompt_id = 'prompt-' . $index;
+            $prompt_storage .= '<div id="' . $prompt_id . '" class="prompt-storage" style="display:none;">' . esc_html($res['prompt_text']) . '</div>';
+            $data_attrs = 'data-modal="prompt" data-prompt-id="' . $prompt_id . '" data-title="' . esc_attr($res['title']) . '"';
         } else {
             // Gem/GPT - modal will show link
             $data_attrs = 'data-modal="gem" data-gem-link="' . esc_url($res['link']) . '" data-title="' . esc_attr($res['title']) . '"';
@@ -84,6 +87,7 @@ add_shortcode('resource_grid', function() {
         </div>';
     }
     $output .= '</div>';
+    $output .= $prompt_storage; // Add hidden prompt storage divs
     return $output;
 });
 
