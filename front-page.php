@@ -4,18 +4,11 @@
  */
 get_header(); ?>
 
-<style>
-    .terminal-header { font-family: 'Space Grotesk', 'Courier New', monospace; font-weight: 700; font-size: 1.1rem; color: #1F2937; margin-bottom: 20px; display: flex; align-items: center; opacity: 0.9; }
-    .terminal-text { letter-spacing: -0.02em; }
-    .cursor { display: inline-block; width: 10px; height: 1.2em; background-color: #FF4500; margin-left: 6px; animation: blinkCursor 1s infinite; }
-    @keyframes blinkCursor { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-</style>
-
 <div class="lab-container">
 
-<div class="terminal-header">
-    <span class="terminal-text">&gt; adityavj.com</span><span class="cursor"></span>
-</div>
+    <div class="terminal-header">
+        <span class="terminal-text">&gt; adityavj.com</span><span class="cursor"></span>
+    </div>
 
     <div class="lab-hero">
         <div class="hero-text">
