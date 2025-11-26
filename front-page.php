@@ -53,6 +53,133 @@ get_header(); ?>
         <a href="https://calendly.com/adityavj" target="_blank" class="btn btn-primary">Check Availability</a>
     </div>
 
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal-container" class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
 </div>
+
+<script>
+(function() {
+    'use strict';
+
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalContainer = document.getElementById('modal-container');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalFooter = document.getElementById('modal-footer');
+    const modalClose = document.querySelector('.modal-close');
+    const toast = document.getElementById('toast');
+
+    // Get all course cards with modal data attributes
+    const resourceCards = document.querySelectorAll('.course-card[data-modal]');
+
+    // Open modal on card click
+    resourceCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.preventDefault();
+            const modalType = this.getAttribute('data-modal');
+            const title = this.getAttribute('data-title');
+
+            modalTitle.textContent = title;
+
+            if (modalType === 'prompt') {
+                // Show prompt text with copy button
+                const promptText = this.getAttribute('data-prompt-text');
+                modalBody.innerHTML = '<pre>' + escapeHtml(promptText) + '</pre>';
+                modalFooter.innerHTML = '<button class="copy-button" onclick="copyToClipboard(\'' +
+                    escapeForJs(promptText) + '\')">📋 Copy Prompt</button>';
+            } else if (modalType === 'gem') {
+                // Show gem description with link
+                const gemLink = this.getAttribute('data-gem-link');
+                modalBody.innerHTML = '<div class="gem-description">Click below to open this tool in a new tab and start using it right away.</div>';
+                modalFooter.innerHTML = '<a href="' + gemLink + '" target="_blank" class="btn btn-primary">Open Tool →</a>';
+            }
+
+            // Show modal
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // Close modal handlers
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            modalBody.innerHTML = '';
+            modalFooter.innerHTML = '';
+            modalTitle.textContent = '';
+        }, 300);
+    }
+
+    modalClose.addEventListener('click', closeModal);
+
+    modalOverlay.addEventListener('click', function(e) {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
+    });
+
+    // ESC key to close
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    // Stop propagation on modal container clicks
+    modalContainer.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Copy to clipboard function
+    window.copyToClipboard = function(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('Copied to clipboard! ✅');
+        }).catch(function(err) {
+            showToast('Failed to copy ❌');
+            console.error('Copy failed:', err);
+        });
+    };
+
+    // Show toast notification
+    function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // HTML escape utility
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // JS escape utility for onclick attributes
+    function escapeForJs(text) {
+        return text
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r');
+    }
+})();
+</script>
 
 <?php get_footer(); ?>

@@ -24,17 +24,6 @@ add_action( 'wp_enqueue_scripts', function() {
     wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
     wp_enqueue_style( 'child-style', get_stylesheet_directory_uri() . '/style.css', array('parent-style'), '2.1.0' );
     wp_enqueue_style( 'google-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700;900&display=swap', false );
-    
-    // Copy Button Script
-    wp_add_inline_script('child-style', "
-        function copyPrompt(btn, text) {
-            navigator.clipboard.writeText(text).then(function() {
-                let original = btn.innerText;
-                btn.innerText = 'Copied! ✅';
-                setTimeout(() => { btn.innerText = original; }, 2000);
-            });
-        }
-    ");
 } );
 
 // === HELPER: GET DATA FROM JSON ===
@@ -70,24 +59,28 @@ add_shortcode('resource_grid', function() {
 
     $output = '<div class="course-grid">';
     foreach ($data['resources'] as $res) {
-        
+
         $icon = '💎';
         if ($res['type'] === 'Gemini Gem') { $icon = '💎'; }
         elseif ($res['type'] === 'Custom GPT') { $icon = '🤖'; }
         elseif (strpos($res['type'], 'Prompt') !== false) { $icon = '⚡'; }
 
+        // Build data attributes for modal
+        $data_attrs = '';
         if (!empty($res['prompt_text'])) {
-            $safe_prompt = htmlspecialchars(json_encode($res['prompt_text']), ENT_QUOTES, 'UTF-8');
-            $action_btn = '<button onclick="copyPrompt(this, ' . $safe_prompt . ')" class="btn-outline" style="width:100%; cursor:pointer; padding:12px; border-radius:8px;">Copy Prompt 📋</button>';
+            // Resource with prompt - modal will show prompt text
+            $escaped_prompt = htmlspecialchars($res['prompt_text'], ENT_QUOTES, 'UTF-8');
+            $data_attrs = 'data-modal="prompt" data-prompt-text="' . $escaped_prompt . '" data-title="' . esc_attr($res['title']) . '"';
         } else {
-            $action_btn = '<a href="' . esc_url($res['link']) . '" target="_blank" class="btn-outline" style="width:100%; text-align:center; display:block; padding:12px; border-radius:8px;">Try Now →</a>';
+            // Gem/GPT - modal will show link
+            $data_attrs = 'data-modal="gem" data-gem-link="' . esc_url($res['link']) . '" data-title="' . esc_attr($res['title']) . '"';
         }
 
         $output .= '
-        <div class="course-card">
+        <div class="course-card" ' . $data_attrs . '>
             <span class="course-tag">' . $icon . ' ' . esc_html($res['type']) . '</span>
             <div class="course-link">' . esc_html($res['title']) . '</div>
-            <div style="margin-top:auto;">' . $action_btn . '</div>
+            <div class="course-footer">View Details →</div>
         </div>';
     }
     $output .= '</div>';
