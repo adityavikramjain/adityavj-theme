@@ -1,10 +1,14 @@
 <?php
-// 1. Enqueue Styles & Scripts
+// 1. Enqueue Styles & Fonts
 add_action( 'wp_enqueue_scripts', function() {
+    // Load Parent & Child Styles
     wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
     wp_enqueue_style( 'child-style', get_stylesheet_directory_uri() . '/style.css', array('parent-style') );
+
+    // FIX: Load Google Fonts (Inter + Space Grotesk)
+    wp_enqueue_style( 'google-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap', false );
     
-    // Add a tiny JS script for the Copy Button
+    // Copy Button Script
     wp_add_inline_script('child-style', "
         function copyPrompt(btn, text) {
             navigator.clipboard.writeText(text).then(function() {
@@ -36,14 +40,14 @@ add_shortcode('course_grid', function() {
             <a href="' . esc_url($course['url']) . '" target="_blank" class="course-link">' . esc_html($course['title']) . '</a>
             <p class="course-meta">' . esc_html($course['program']) . ' • ' . esc_html($course['institution']) . '</p>
             <p class="course-desc">' . esc_html($course['desc']) . '</p>
-            <div class="course-footer">View Slides →</div>
+            <div class="course-footer">Open Deck →</div>
         </div>';
     }
     $output .= '</div>';
     return $output;
 });
 
-// 4. Shortcode: [resource_grid] (UPDATED WITH COPY LOGIC)
+// 4. Shortcode: [resource_grid]
 add_shortcode('resource_grid', function() {
     $data = get_lab_data();
     if (empty($data['resources'])) return '<p>No resources found.</p>';
@@ -51,20 +55,15 @@ add_shortcode('resource_grid', function() {
     $output = '<div class="course-grid">';
     foreach ($data['resources'] as $res) {
         
-        // Icon Logic
         $icon = '📝';
         if ($res['type'] === 'Gemini Gem') { $icon = '💎'; }
         elseif ($res['type'] === 'Custom GPT') { $icon = '🤖'; }
         elseif (strpos($res['type'], 'Prompt') !== false) { $icon = '⚡'; }
 
-        // Button Logic: Copy vs Link
         if (!empty($res['prompt_text'])) {
-            // It's a Prompt -> Show Copy Button
-            // We use htmlspecialchars to safely put the prompt inside the onclick event
             $safe_prompt = htmlspecialchars(json_encode($res['prompt_text']), ENT_QUOTES, 'UTF-8');
             $action_btn = '<button onclick="copyPrompt(this, ' . $safe_prompt . ')" class="btn-outline" style="width:100%; cursor:pointer;">Copy Prompt 📋</button>';
         } else {
-            // It's a Link -> Show Link Button
             $action_btn = '<a href="' . esc_url($res['link']) . '" target="_blank" class="btn-outline" style="width:100%; text-align:center; display:block;">Try Now →</a>';
         }
 
@@ -84,7 +83,7 @@ add_shortcode('resource_grid', function() {
 add_shortcode('writing_grid', function() {
     $args = array('post_type' => 'post', 'posts_per_page' => 3);
     $query = new WP_Query($args);
-    if (!$query->have_posts()) return '<p>No writings yet.</p>';
+    if (!$query->have_posts()) return '<p>No posts found.</p>';
     
     $output = '<div class="course-grid">';
     while ($query->have_posts()) {
@@ -100,26 +99,4 @@ add_shortcode('writing_grid', function() {
     $output .= '</div>';
     wp_reset_postdata();
     return $output;
-});
-
-/* --- DEBUGGING TOOL --- */
-add_shortcode('debug_json', function() {
-    $file = get_stylesheet_directory() . '/data.json';
-    
-    // Check 1: Does the file exist?
-    if (!file_exists($file)) {
-        return '<div style="background:red; color:white; padding:20px;">ERROR: data.json not found at ' . $file . '</div>';
-    }
-
-    // Check 2: Can we read it?
-    $content = file_get_contents($file);
-    $data = json_decode($content, true);
-
-    // Check 3: Is the JSON valid?
-    if ($data === null) {
-        return '<div style="background:red; color:white; padding:20px;">JSON SYNTAX ERROR: ' . json_last_error_msg() . '</div>';
-    }
-
-    // Success Message
-    return '<div style="background:green; color:white; padding:20px;">SUCCESS: Found ' . count($data['courses']) . ' courses.</div>';
 });
