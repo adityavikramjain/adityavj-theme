@@ -101,3 +101,25 @@ add_shortcode('writing_grid', function() {
     wp_reset_postdata();
     return $output;
 });
+
+/* --- DEBUGGING TOOL --- */
+add_shortcode('debug_json', function() {
+    $file = get_stylesheet_directory() . '/data.json';
+    
+    // Check 1: Does the file exist?
+    if (!file_exists($file)) {
+        return '<div style="background:red; color:white; padding:20px;">ERROR: data.json not found at ' . $file . '</div>';
+    }
+
+    // Check 2: Can we read it?
+    $content = file_get_contents($file);
+    $data = json_decode($content, true);
+
+    // Check 3: Is the JSON valid?
+    if ($data === null) {
+        return '<div style="background:red; color:white; padding:20px;">JSON SYNTAX ERROR: ' . json_last_error_msg() . '</div>';
+    }
+
+    // Success Message
+    return '<div style="background:green; color:white; padding:20px;">SUCCESS: Found ' . count($data['courses']) . ' courses.</div>';
+});
