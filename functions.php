@@ -214,3 +214,65 @@ add_shortcode('writing_grid', function() {
     wp_reset_postdata();
     return $output;
 });
+
+// === MIGRATION SCRIPT (TEMPORARY - Remove after use) ===
+// Usage: Visit yoursite.com/?migrate_json_data=migrate123 (as admin)
+add_action('init', function() {
+    if (isset($_GET['migrate_json_data']) && $_GET['migrate_json_data'] === 'migrate123' && current_user_can('manage_options')) {
+
+        $results = array('sessions' => array(), 'resources' => array(), 'errors' => array());
+        $json_data = get_lab_data();
+
+        // Migrate Sessions
+        if (!empty($json_data['courses'])) {
+            foreach ($json_data['courses'] as $course) {
+                $post_id = wp_insert_post(array(
+                    'post_type' => 'av_session',
+                    'post_title' => $course['title'],
+                    'post_status' => 'publish'
+                ));
+
+                if (!is_wp_error($post_id)) {
+                    update_field('institution', $course['institution'], $post_id);
+                    update_field('program', $course['program'], $post_id);
+                    update_field('session_url', $course['url'], $post_id);
+                    update_field('tag', $course['tag'] ?? 'Session', $post_id);
+                    update_field('description', $course['desc'], $post_id);
+                    $results['sessions'][] = $course['title'];
+                } else {
+                    $results['errors'][] = 'Failed to create session: ' . $course['title'];
+                }
+            }
+        }
+
+        // Migrate Resources
+        if (!empty($json_data['resources'])) {
+            foreach ($json_data['resources'] as $resource) {
+                $post_id = wp_insert_post(array(
+                    'post_type' => 'av_resource',
+                    'post_title' => $resource['title'],
+                    'post_status' => 'publish'
+                ));
+
+                if (!is_wp_error($post_id)) {
+                    update_field('resource_type', $resource['type'], $post_id);
+                    update_field('description', $resource['desc'], $post_id);
+                    update_field('resource_link', $resource['link'], $post_id);
+                    update_field('prompt_text', $resource['prompt_text'], $post_id);
+                    $results['resources'][] = $resource['title'];
+                } else {
+                    $results['errors'][] = 'Failed to create resource: ' . $resource['title'];
+                }
+            }
+        }
+
+        // Display results
+        wp_die('<h1>Migration Complete!</h1>
+            <h2>Sessions Created (' . count($results['sessions']) . '):</h2>
+            <ul><li>' . implode('</li><li>', $results['sessions']) . '</li></ul>
+            <h2>Resources Created (' . count($results['resources']) . '):</h2>
+            <ul><li>' . implode('</li><li>', $results['resources']) . '</li></ul>
+            ' . (!empty($results['errors']) ? '<h2>Errors:</h2><ul><li>' . implode('</li><li>', $results['errors']) . '</li></ul>' : '') . '
+            <p><a href="' . admin_url() . '">Go to Dashboard</a></p>');
+    }
+});
