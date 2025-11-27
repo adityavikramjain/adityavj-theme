@@ -50,7 +50,13 @@ get_header(); ?>
         <div class="filter-count" id="sessions-count"></div>
     </div>
 
-    <?php echo do_shortcode('[course_grid]'); ?>
+    <div class="grid-wrapper" id="sessions-wrapper">
+        <?php echo do_shortcode('[course_grid]'); ?>
+        <button class="show-more-button" data-target="sessions">
+            <span class="show-more-text">Show More</span>
+            <span class="show-less-text" style="display:none;">Show Less</span>
+        </button>
+    </div>
 
     <div id="resources" class="lab-section-header">
         <h2 class="lab-title">The AI Lab</h2>
@@ -70,7 +76,13 @@ get_header(); ?>
         <div class="filter-count" id="resources-count"></div>
     </div>
 
-    <?php echo do_shortcode('[resource_grid]'); ?>
+    <div class="grid-wrapper" id="resources-wrapper">
+        <?php echo do_shortcode('[resource_grid]'); ?>
+        <button class="show-more-button" data-target="resources">
+            <span class="show-more-text">Show More</span>
+            <span class="show-less-text" style="display:none;">Show Less</span>
+        </button>
+    </div>
 
     <div class="lab-section-header">
         <h2 class="lab-title">Build Notes & Writings</h2>
@@ -273,12 +285,130 @@ get_header(); ?>
         if (countElement) {
             countElement.textContent = 'Showing ' + visibleCount + ' of ' + totalCount;
         }
+
+        // Update accordion after filtering
+        if (typeof updateAccordionAfterFilter === 'function') {
+            updateAccordionAfterFilter(target);
+        }
     }
 
     // Initialize counts on page load
     document.addEventListener('DOMContentLoaded', function() {
         applyFilter('sessions', 'all');
         applyFilter('resources', 'all');
+        initializeAccordion('sessions');
+        initializeAccordion('resources');
+    });
+
+    // === ACCORDION SYSTEM ===
+    const CARDS_PER_ROW = 3;
+    const INITIAL_ROWS = 2;
+    const INITIAL_CARDS = CARDS_PER_ROW * INITIAL_ROWS; // 6 cards
+    let accordionState = { sessions: false, resources: false }; // false = collapsed, true = expanded
+
+    function initializeAccordion(target) {
+        const allGrids = document.querySelectorAll('.course-grid');
+        const grid = target === 'sessions' ? allGrids[0] : allGrids[1];
+
+        if (!grid) return;
+
+        const cards = grid.querySelectorAll('.filterable-card');
+        const button = document.querySelector('.show-more-button[data-target="' + target + '"]');
+
+        if (!button) return;
+
+        // Hide cards beyond initial display
+        cards.forEach((card, index) => {
+            if (index >= INITIAL_CARDS) {
+                card.classList.add('accordion-hidden');
+            }
+        });
+
+        // Hide button if total cards <= INITIAL_CARDS
+        if (cards.length <= INITIAL_CARDS) {
+            button.classList.add('hidden');
+        } else {
+            button.classList.remove('hidden');
+        }
+    }
+
+    function updateAccordionAfterFilter(target) {
+        const allGrids = document.querySelectorAll('.course-grid');
+        const grid = target === 'sessions' ? allGrids[0] : allGrids[1];
+
+        if (!grid) return;
+
+        const visibleCards = Array.from(grid.querySelectorAll('.filterable-card')).filter(card => !card.classList.contains('hidden'));
+        const button = document.querySelector('.show-more-button[data-target="' + target + '"]');
+
+        if (!button) return;
+
+        // If expanded, show all visible cards
+        if (accordionState[target]) {
+            visibleCards.forEach(card => {
+                card.classList.remove('accordion-hidden');
+            });
+        } else {
+            // If collapsed, show only first INITIAL_CARDS visible cards
+            visibleCards.forEach((card, index) => {
+                if (index >= INITIAL_CARDS) {
+                    card.classList.add('accordion-hidden');
+                } else {
+                    card.classList.remove('accordion-hidden');
+                }
+            });
+        }
+
+        // Hide button if visible cards <= INITIAL_CARDS
+        if (visibleCards.length <= INITIAL_CARDS) {
+            button.classList.add('hidden');
+        } else {
+            button.classList.remove('hidden');
+        }
+    }
+
+    // Show More / Show Less button handlers
+    const showMoreButtons = document.querySelectorAll('.show-more-button');
+    showMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-target');
+            const allGrids = document.querySelectorAll('.course-grid');
+            const grid = target === 'sessions' ? allGrids[0] : allGrids[1];
+
+            if (!grid) return;
+
+            const visibleCards = Array.from(grid.querySelectorAll('.filterable-card')).filter(card => !card.classList.contains('hidden'));
+            const showMoreText = this.querySelector('.show-more-text');
+            const showLessText = this.querySelector('.show-less-text');
+
+            if (accordionState[target]) {
+                // Currently expanded, collapse it
+                visibleCards.forEach((card, index) => {
+                    if (index >= INITIAL_CARDS) {
+                        card.classList.add('accordion-hidden');
+                    }
+                });
+                showMoreText.style.display = '';
+                showLessText.style.display = 'none';
+                accordionState[target] = false;
+
+                // Scroll to section header
+                const header = target === 'sessions'
+                    ? document.querySelector('.lab-section-header:has(.lab-title)')
+                    : document.querySelector('#resources');
+                if (header) {
+                    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else {
+                // Currently collapsed, expand it
+                visibleCards.forEach(card => {
+                    card.classList.remove('accordion-hidden');
+                });
+                showMoreText.style.display = 'none';
+                showLessText.style.display = '';
+                accordionState[target] = true;
+            }
+        });
     });
 })();
 </script>
