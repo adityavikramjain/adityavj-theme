@@ -250,6 +250,8 @@ get_header(); ?>
     });
 
     function applyFilter(target, filter) {
+        console.log('Applying filter:', target, '-', filter);
+
         // Determine which grid to filter
         const gridSelector = target === 'sessions' ?
             '.lab-section-header:has(.lab-title:contains("Academic Sessions")) + .filter-container + .course-grid' :
@@ -259,7 +261,10 @@ get_header(); ?>
         const allGrids = document.querySelectorAll('.course-grid');
         const grid = target === 'sessions' ? allGrids[0] : allGrids[1];
 
-        if (!grid) return;
+        if (!grid) {
+            console.log('Filter: Grid not found for', target);
+            return;
+        }
 
         const cards = grid.querySelectorAll('.filterable-card');
         let visibleCount = 0;
@@ -271,10 +276,17 @@ get_header(); ?>
                 visibleCount++;
             } else {
                 const cardTags = card.getAttribute('data-tags');
-                if (cardTags && cardTags.split(',').includes(filter)) {
-                    card.classList.remove('hidden');
-                    visibleCount++;
+                if (cardTags) {
+                    // Split tags and trim whitespace
+                    const tagArray = cardTags.split(',').map(tag => tag.trim());
+                    if (tagArray.includes(filter)) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
                 } else {
+                    // No tags, hide when filtering
                     card.classList.add('hidden');
                 }
             }
@@ -286,18 +298,23 @@ get_header(); ?>
             countElement.textContent = 'Showing ' + visibleCount + ' of ' + totalCount;
         }
 
+        console.log('Filter result:', target, '- Showing', visibleCount, 'of', totalCount, 'cards');
+
         // Update accordion after filtering
         if (typeof updateAccordionAfterFilter === 'function') {
             updateAccordionAfterFilter(target);
         }
     }
 
-    // Initialize counts on page load
+    // Initialize counts and accordion on page load
     document.addEventListener('DOMContentLoaded', function() {
-        applyFilter('sessions', 'all');
-        applyFilter('resources', 'all');
-        initializeAccordion('sessions');
-        initializeAccordion('resources');
+        // Small delay to ensure grids are fully rendered
+        setTimeout(function() {
+            applyFilter('sessions', 'all');
+            applyFilter('resources', 'all');
+            initializeAccordion('sessions');
+            initializeAccordion('resources');
+        }, 100);
     });
 
     // === ACCORDION SYSTEM ===
@@ -310,17 +327,30 @@ get_header(); ?>
         const allGrids = document.querySelectorAll('.course-grid');
         const grid = target === 'sessions' ? allGrids[0] : allGrids[1];
 
-        if (!grid) return;
+        if (!grid) {
+            console.log('Accordion init: Grid not found for', target);
+            return;
+        }
 
         const cards = grid.querySelectorAll('.filterable-card');
         const button = document.querySelector('.show-more-button[data-target="' + target + '"]');
 
-        if (!button) return;
+        console.log('Accordion init:', target, '- Found', cards.length, 'cards, showing first', INITIAL_CARDS);
+
+        if (!button) {
+            console.log('Accordion init: Button not found for', target);
+            return;
+        }
+
+        // Reset accordion state
+        accordionState[target] = false;
 
         // Hide cards beyond initial display
         cards.forEach((card, index) => {
             if (index >= INITIAL_CARDS) {
                 card.classList.add('accordion-hidden');
+            } else {
+                card.classList.remove('accordion-hidden');
             }
         });
 
