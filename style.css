@@ -88,6 +88,19 @@ p { line-height: 1.6; color: var(--soft-grey); }
 .course-footer { margin-top: auto; font-weight: 600; color: var(--electric-orange); display: flex; align-items: center; gap: 8px; transition: gap 0.3s var(--ease-elastic); }
 .course-card:hover .course-footer { gap: 15px; }
 
+/* === WORKFLOW CARDS === */
+.workflow-card { cursor: default; grid-column: span 2; }
+.workflow-title { font-size: 1.5rem; font-weight: 700; color: var(--charcoal); margin-bottom: 11px; line-height: 1.25; }
+.workflow-desc { color: var(--soft-grey); font-size: 0.95rem; line-height: 1.6; margin-bottom: 18px; }
+.workflow-steps { display: flex; align-items: center; gap: 16px; margin-top: 20px; }
+.workflow-step { flex: 1; background: var(--mist-rose); border: 1px solid rgba(255, 69, 0, 0.15); border-radius: 12px; padding: 16px; text-decoration: none; display: flex; flex-direction: column; gap: 8px; transition: all 0.2s var(--ease-smooth); cursor: pointer; }
+.workflow-step:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(255, 69, 0, 0.2); border-color: var(--electric-orange); background: var(--white); }
+.step-number { width: 28px; height: 28px; background: var(--electric-orange); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+.step-title { font-size: 1.1rem; font-weight: 700; color: var(--charcoal); }
+.step-desc { font-size: 0.85rem; color: var(--soft-grey); line-height: 1.5; }
+.workflow-arrow { color: var(--electric-orange); font-size: 2rem; font-weight: 700; flex-shrink: 0; }
+@media (max-width: 968px) { .workflow-card { grid-column: span 1; } .workflow-steps { flex-direction: column; } .workflow-arrow { transform: rotate(90deg); } }
+
 /* === BOOKING === */
 .booking-bar { background: linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%); border-radius: 24px; padding: 80px 40px; text-align: center; margin-top: 100px; position: relative; overflow: hidden; border: 1px solid rgba(255, 69, 0, 0.1); box-shadow: 0 20px 60px rgba(255, 69, 0, 0.08); }
 .booking-bar::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 69, 0, 0.05) 0%, transparent 70%); border-radius: 50%; animation: pulseRing 3s ease-in-out infinite; z-index: 0; }

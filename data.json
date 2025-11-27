@@ -138,6 +138,26 @@
             "link": "https:\/\/gemini.google.com\/gem\/1bmEL9REY7rlUZ_fc1B1F0QpTP2nuHl5D?usp=sharing",
             "tags": ["Sales", "Marketing", "AI"],
             "prompt_text": ""
+        },
+        {
+            "type": "Workflow",
+            "workflow_title": "Presentation Design System",
+            "workflow_desc": "Two-step AI workflow that transforms your ideas into beautiful HTML presentations",
+            "tags": ["AI", "Product Management"],
+            "steps": [
+                {
+                    "step_number": 1,
+                    "title": "Maestro",
+                    "desc": "Analyzes your content and generates a structured JSON blueprint for your presentation",
+                    "link": "https:\/\/gemini.google.com\/gem\/MAESTRO_GEM_ID"
+                },
+                {
+                    "step_number": 2,
+                    "title": "Virtuoso",
+                    "desc": "Takes the JSON output from Maestro and creates a stunning single-file HTML presentation",
+                    "link": "https:\/\/gemini.google.com\/gem\/VIRTUOSO_GEM_ID"
+                }
+            ]
         }
     ]
 }
