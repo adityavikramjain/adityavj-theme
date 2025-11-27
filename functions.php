@@ -227,38 +227,64 @@ add_shortcode('resource_grid', function() {
 
     foreach ($resources as $index => $res) {
 
-        $icon = '💎';
-        if ($res['type'] === 'Gemini Gem') { $icon = '💎'; }
-        elseif ($res['type'] === 'Custom GPT') { $icon = '🤖'; }
-        elseif (strpos($res['type'], 'Prompt') !== false) { $icon = '⚡'; }
-
-        // Build data attributes for modal
-        $data_attrs = '';
-        if (!empty($res['prompt_text'])) {
-            // Resource with prompt - store in hidden div and reference by ID
-            $prompt_id = 'prompt-' . $index;
-            $prompt_storage .= '<div id="' . $prompt_id . '" class="prompt-storage" style="display:none;">' . esc_html($res['prompt_text']) . '</div>';
-            $data_attrs = 'data-modal="prompt" data-prompt-id="' . $prompt_id . '" data-title="' . esc_attr($res['title']) . '"';
-        } else {
-            // Gem/GPT - modal will show link
-            $data_attrs = 'data-modal="gem" data-gem-link="' . esc_url($res['link']) . '" data-title="' . esc_attr($res['title']) . '"';
-        }
-
         // Build data-tags attribute for filtering
         $tags_attr = '';
         if (!empty($res['topics']) && is_array($res['topics'])) {
             $tags_attr = 'data-tags="' . esc_attr(implode(',', $res['topics'])) . '"';
         }
 
-        $output .= '
-        <div class="course-card filterable-card" ' . $data_attrs . ' ' . $tags_attr . '>
-            <span class="course-tag">' . $icon . ' ' . esc_html($res['type']) . '</span>
-            <div class="course-link">' . esc_html($res['title']) . '</div>
-            
-            <p class="course-desc">' . esc_html($res['desc']) . '</p>
-            
-            <div class="course-footer">View Details →</div>
-        </div>';
+        // Check if this is a workflow
+        if ($res['type'] === 'Workflow' && !empty($res['steps'])) {
+            // WORKFLOW CARD
+            $output .= '
+            <div class="course-card workflow-card filterable-card" ' . $tags_attr . '>
+                <span class="course-tag">🔗 WORKFLOW</span>
+                <div class="workflow-title">' . esc_html($res['workflow_title']) . '</div>
+                <p class="workflow-desc">' . esc_html($res['workflow_desc']) . '</p>
+                <div class="workflow-steps">';
+
+            foreach ($res['steps'] as $step_index => $step) {
+                $step_class = $step_index > 0 ? 'workflow-step-right' : 'workflow-step-left';
+                $output .= '
+                    <a href="' . esc_url($step['link']) . '" target="_blank" class="workflow-step ' . $step_class . '">
+                        <div class="step-number">' . $step['step_number'] . '</div>
+                        <div class="step-title">' . esc_html($step['title']) . '</div>
+                        <div class="step-desc">' . esc_html($step['desc']) . '</div>
+                    </a>';
+
+                if ($step_index < count($res['steps']) - 1) {
+                    $output .= '<div class="workflow-arrow">→</div>';
+                }
+            }
+
+            $output .= '</div></div>';
+        } else {
+            // REGULAR RESOURCE CARD
+            $icon = '💎';
+            if ($res['type'] === 'Gemini Gem') { $icon = '💎'; }
+            elseif ($res['type'] === 'Custom GPT') { $icon = '🤖'; }
+            elseif (strpos($res['type'], 'Prompt') !== false) { $icon = '⚡'; }
+
+            // Build data attributes for modal
+            $data_attrs = '';
+            if (!empty($res['prompt_text'])) {
+                // Resource with prompt - store in hidden div and reference by ID
+                $prompt_id = 'prompt-' . $index;
+                $prompt_storage .= '<div id="' . $prompt_id . '" class="prompt-storage" style="display:none;">' . esc_html($res['prompt_text']) . '</div>';
+                $data_attrs = 'data-modal="prompt" data-prompt-id="' . $prompt_id . '" data-title="' . esc_attr($res['title']) . '"';
+            } else {
+                // Gem/GPT - modal will show link
+                $data_attrs = 'data-modal="gem" data-gem-link="' . esc_url($res['link']) . '" data-title="' . esc_attr($res['title']) . '"';
+            }
+
+            $output .= '
+            <div class="course-card filterable-card" ' . $data_attrs . ' ' . $tags_attr . '>
+                <span class="course-tag">' . $icon . ' ' . esc_html($res['type']) . '</span>
+                <div class="course-link">' . esc_html($res['title']) . '</div>
+                <p class="course-desc">' . esc_html($res['desc']) . '</p>
+                <div class="course-footer">View Details →</div>
+            </div>';
+        }
     }
     $output .= '</div>';
     $output .= $prompt_storage; // Add hidden prompt storage divs
