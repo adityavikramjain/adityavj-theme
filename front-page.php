@@ -35,11 +35,41 @@ get_header(); ?>
     <div class="lab-section-header">
         <h2 class="lab-title">Academic Sessions</h2>
     </div>
+
+    <!-- Sessions Filter -->
+    <div class="filter-container">
+        <div class="filter-bar">
+            <button class="filter-button active" data-filter="all" data-target="sessions">All</button>
+            <button class="filter-button" data-filter="Sales" data-target="sessions">Sales</button>
+            <button class="filter-button" data-filter="Marketing" data-target="sessions">Marketing</button>
+            <button class="filter-button" data-filter="Product Management" data-target="sessions">Product Management</button>
+            <button class="filter-button" data-filter="Customer Experience" data-target="sessions">Customer Experience</button>
+            <button class="filter-button" data-filter="AI" data-target="sessions">AI</button>
+            <button class="filter-button" data-filter="Research with AI" data-target="sessions">Research with AI</button>
+        </div>
+        <div class="filter-count" id="sessions-count"></div>
+    </div>
+
     <?php echo do_shortcode('[course_grid]'); ?>
 
     <div id="resources" class="lab-section-header">
         <h2 class="lab-title">The AI Lab</h2>
     </div>
+
+    <!-- Resources Filter -->
+    <div class="filter-container">
+        <div class="filter-bar">
+            <button class="filter-button active" data-filter="all" data-target="resources">All</button>
+            <button class="filter-button" data-filter="Sales" data-target="resources">Sales</button>
+            <button class="filter-button" data-filter="Marketing" data-target="resources">Marketing</button>
+            <button class="filter-button" data-filter="Product Management" data-target="resources">Product Management</button>
+            <button class="filter-button" data-filter="Customer Experience" data-target="resources">Customer Experience</button>
+            <button class="filter-button" data-filter="AI" data-target="resources">AI</button>
+            <button class="filter-button" data-filter="Research with AI" data-target="resources">Research with AI</button>
+        </div>
+        <div class="filter-count" id="resources-count"></div>
+    </div>
+
     <?php echo do_shortcode('[resource_grid]'); ?>
 
     <div class="lab-section-header">
@@ -183,6 +213,73 @@ get_header(); ?>
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // === FILTERING SYSTEM ===
+    const filterButtons = document.querySelectorAll('.filter-button');
+    let activeFilters = { sessions: 'all', resources: 'all' };
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            const target = this.getAttribute('data-target');
+
+            // Update active state for this filter group
+            document.querySelectorAll('.filter-button[data-target="' + target + '"]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Store active filter
+            activeFilters[target] = filter;
+
+            // Apply filter
+            applyFilter(target, filter);
+        });
+    });
+
+    function applyFilter(target, filter) {
+        // Determine which grid to filter
+        const gridSelector = target === 'sessions' ?
+            '.lab-section-header:has(.lab-title:contains("Academic Sessions")) + .filter-container + .course-grid' :
+            '.lab-section-header:has(.lab-title:contains("The AI Lab")) + .filter-container + .course-grid';
+
+        // Find the correct grid by position
+        const allGrids = document.querySelectorAll('.course-grid');
+        const grid = target === 'sessions' ? allGrids[0] : allGrids[1];
+
+        if (!grid) return;
+
+        const cards = grid.querySelectorAll('.filterable-card');
+        let visibleCount = 0;
+        const totalCount = cards.length;
+
+        cards.forEach(card => {
+            if (filter === 'all') {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                const cardTags = card.getAttribute('data-tags');
+                if (cardTags && cardTags.split(',').includes(filter)) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            }
+        });
+
+        // Update count display
+        const countElement = document.getElementById(target + '-count');
+        if (countElement) {
+            countElement.textContent = 'Showing ' + visibleCount + ' of ' + totalCount;
+        }
+    }
+
+    // Initialize counts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        applyFilter('sessions', 'all');
+        applyFilter('resources', 'all');
+    });
 })();
 </script>
 
