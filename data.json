@@ -149,13 +149,13 @@
                     "step_number": 1,
                     "title": "Maestro",
                     "desc": "Analyzes your content and generates a structured JSON blueprint for your presentation",
-                    "link": "https:\/\/gemini.google.com\/gem\/MAESTRO_GEM_ID"
+                    "link": "https:\/\/gemini.google.com\/gem\/1tZtrrrb7jjQlq1YHgSVHvW9_OIRD0i8N?usp=sharing"
                 },
                 {
                     "step_number": 2,
                     "title": "Virtuoso",
                     "desc": "Takes the JSON output from Maestro and creates a stunning single-file HTML presentation",
-                    "link": "https:\/\/gemini.google.com\/gem\/VIRTUOSO_GEM_ID"
+                    "link": "https:\/\/gemini.google.com\/gem\/1yKGCsSNr1Eds_uEuOFO2eoHb3x2DHSrY?usp=sharing"
                 }
             ]
         }
