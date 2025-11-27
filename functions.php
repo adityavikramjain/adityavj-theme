@@ -33,13 +33,112 @@ function get_lab_data() {
     return json_decode(file_get_contents($json_file), true);
 }
 
+// === REGISTER CUSTOM POST TYPES ===
+add_action('init', function() {
+    // Sessions CPT
+    register_post_type('av_session', array(
+        'labels' => array(
+            'name' => 'Sessions',
+            'singular_name' => 'Session',
+            'add_new_item' => 'Add New Session',
+            'edit_item' => 'Edit Session',
+            'view_item' => 'View Session'
+        ),
+        'public' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-welcome-learn-more',
+        'supports' => array('title', 'custom-fields'),
+        'has_archive' => false,
+        'show_in_rest' => true
+    ));
+
+    // Resources CPT
+    register_post_type('av_resource', array(
+        'labels' => array(
+            'name' => 'AI Resources',
+            'singular_name' => 'AI Resource',
+            'add_new_item' => 'Add New Resource',
+            'edit_item' => 'Edit Resource',
+            'view_item' => 'View Resource'
+        ),
+        'public' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-lightbulb',
+        'supports' => array('title', 'custom-fields'),
+        'has_archive' => false,
+        'show_in_rest' => true
+    ));
+});
+
+// === HYBRID DATA FUNCTIONS ===
+function get_all_sessions() {
+    $sessions = array();
+
+    // Get from WordPress
+    $wp_sessions = get_posts(array(
+        'post_type' => 'av_session',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC'
+    ));
+
+    foreach ($wp_sessions as $post) {
+        $sessions[] = array(
+            'title' => $post->post_title,
+            'institution' => get_field('institution', $post->ID) ?: 'Guest Session',
+            'program' => get_field('program', $post->ID) ?: '',
+            'url' => get_field('session_url', $post->ID) ?: '#',
+            'tag' => get_field('tag', $post->ID) ?: 'Session',
+            'desc' => get_field('description', $post->ID) ?: null
+        );
+    }
+
+    // Merge with JSON data
+    $json_data = get_lab_data();
+    if (!empty($json_data['courses'])) {
+        $sessions = array_merge($sessions, $json_data['courses']);
+    }
+
+    return $sessions;
+}
+
+function get_all_resources() {
+    $resources = array();
+
+    // Get from WordPress
+    $wp_resources = get_posts(array(
+        'post_type' => 'av_resource',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC'
+    ));
+
+    foreach ($wp_resources as $post) {
+        $resources[] = array(
+            'title' => $post->post_title,
+            'type' => get_field('resource_type', $post->ID) ?: 'Gemini Gem',
+            'desc' => get_field('description', $post->ID) ?: '',
+            'link' => get_field('resource_link', $post->ID) ?: '#',
+            'prompt_text' => get_field('prompt_text', $post->ID) ?: ''
+        );
+    }
+
+    // Merge with JSON data
+    $json_data = get_lab_data();
+    if (!empty($json_data['resources'])) {
+        $resources = array_merge($resources, $json_data['resources']);
+    }
+
+    return $resources;
+}
+
 // === SHORTCODE: [course_grid] ===
 add_shortcode('course_grid', function() {
-    $data = get_lab_data();
-    if (empty($data['courses'])) return '<p>No courses found.</p>';
+    $sessions = get_all_sessions(); // Hybrid: WordPress + JSON
+    if (empty($sessions)) return '<p>No sessions found.</p>';
 
     $output = '<div class="course-grid">';
-    foreach ($data['courses'] as $course) {
+    foreach ($sessions as $course) {
         $output .= '
         <div class="course-card">
             <span class="course-tag">SESSION</span>
@@ -54,13 +153,13 @@ add_shortcode('course_grid', function() {
 
 // === SHORTCODE: [resource_grid] ===
 add_shortcode('resource_grid', function() {
-    $data = get_lab_data();
-    if (empty($data['resources'])) return '<p>No resources found.</p>';
+    $resources = get_all_resources(); // Hybrid: WordPress + JSON
+    if (empty($resources)) return '<p>No resources found.</p>';
 
     $output = '<div class="course-grid">';
     $prompt_storage = ''; // Hidden divs to store long prompt texts
 
-    foreach ($data['resources'] as $index => $res) {
+    foreach ($resources as $index => $res) {
 
         $icon = '💎';
         if ($res['type'] === 'Gemini Gem') { $icon = '💎'; }
