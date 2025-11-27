@@ -254,6 +254,9 @@ add_shortcode('resource_grid', function() {
         <div class="course-card filterable-card" ' . $data_attrs . ' ' . $tags_attr . '>
             <span class="course-tag">' . $icon . ' ' . esc_html($res['type']) . '</span>
             <div class="course-link">' . esc_html($res['title']) . '</div>
+            
+            <p class="course-desc">' . esc_html($res['desc']) . '</p>
+            
             <div class="course-footer">View Details →</div>
         </div>';
     }

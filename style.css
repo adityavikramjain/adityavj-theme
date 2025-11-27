@@ -74,7 +74,16 @@ p { line-height: 1.6; color: var(--soft-grey); }
 .course-tag { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; align-self: flex-start; margin-bottom: 20px; background: rgba(255, 69, 0, 0.08); color: var(--electric-orange); text-transform: uppercase; letter-spacing: 0.05em; }
 .course-link { font-size: 1.5rem; font-weight: 700; color: var(--charcoal); text-decoration: none; margin-bottom: 15px; line-height: 1.25; display: block; transition: color 0.3s ease; }
 .course-link:hover { color: var(--electric-orange); }
-.course-desc, .course-meta { color: var(--soft-grey); font-size: 0.95rem; margin-bottom: 25px; flex-grow: 1; }
+.course-desc {
+    color: var(--soft-grey);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Pushes the footer to the bottom so all cards align */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 .course-footer { margin-top: auto; font-weight: 600; color: var(--electric-orange); display: flex; align-items: center; gap: 8px; transition: gap 0.3s var(--ease-elastic); }
 .course-card:hover .course-footer { gap: 15px; }
 
