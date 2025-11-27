@@ -7,7 +7,7 @@ get_header(); ?>
 <div class="lab-container">
 
     <div class="terminal-header">
-        <span class="terminal-text">&gt; adityavj.com</span><span class="cursor"></span>
+        <span class="terminal-text"><span class="terminal-prompt">&gt;</span> adityavj.com</span><span class="cursor"></span>
     </div>
 
     <div class="lab-hero">
