@@ -68,7 +68,47 @@ add_action('init', function() {
         'has_archive' => false,
         'show_in_rest' => true
     ));
+
+    // Topics Taxonomy (for filtering)
+    register_taxonomy('av_topic', array('av_session', 'av_resource'), array(
+        'labels' => array(
+            'name' => 'Topics',
+            'singular_name' => 'Topic',
+            'search_items' => 'Search Topics',
+            'all_items' => 'All Topics',
+            'edit_item' => 'Edit Topic',
+            'update_item' => 'Update Topic',
+            'add_new_item' => 'Add New Topic'
+        ),
+        'hierarchical' => false,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'topic'),
+        'show_in_rest' => true
+    ));
 });
+
+// === PRE-POPULATE TOPICS (Runs once) ===
+add_action('init', function() {
+    // Check if topics already exist to avoid duplicates
+    $existing_topics = get_terms(array('taxonomy' => 'av_topic', 'hide_empty' => false));
+
+    if (empty($existing_topics)) {
+        $topics = array(
+            'Sales',
+            'Marketing',
+            'Product Management',
+            'Customer Experience',
+            'AI',
+            'Research with AI'
+        );
+
+        foreach ($topics as $topic) {
+            wp_insert_term($topic, 'av_topic');
+        }
+    }
+}, 20);
 
 // === HYBRID DATA FUNCTIONS ===
 function get_all_sessions() {
@@ -83,20 +123,30 @@ function get_all_sessions() {
     ));
 
     foreach ($wp_sessions as $post) {
+        // Get topics for this post
+        $topics = wp_get_post_terms($post->ID, 'av_topic', array('fields' => 'names'));
+
         $sessions[] = array(
             'title' => $post->post_title,
             'institution' => get_field('institution', $post->ID) ?: 'Guest Session',
             'program' => get_field('program', $post->ID) ?: '',
             'url' => get_field('session_url', $post->ID) ?: '#',
             'tag' => get_field('tag', $post->ID) ?: 'Session',
-            'desc' => get_field('description', $post->ID) ?: null
+            'desc' => get_field('description', $post->ID) ?: null,
+            'topics' => !is_wp_error($topics) ? $topics : array()
         );
     }
 
     // Merge with JSON data
     $json_data = get_lab_data();
     if (!empty($json_data['courses'])) {
-        $sessions = array_merge($sessions, $json_data['courses']);
+        foreach ($json_data['courses'] as $course) {
+            // Ensure topics field exists (use 'tags' from JSON if available)
+            if (!isset($course['topics'])) {
+                $course['topics'] = isset($course['tags']) ? $course['tags'] : array();
+            }
+            $sessions[] = $course;
+        }
     }
 
     return $sessions;
@@ -114,19 +164,29 @@ function get_all_resources() {
     ));
 
     foreach ($wp_resources as $post) {
+        // Get topics for this post
+        $topics = wp_get_post_terms($post->ID, 'av_topic', array('fields' => 'names'));
+
         $resources[] = array(
             'title' => $post->post_title,
             'type' => get_field('resource_type', $post->ID) ?: 'Gemini Gem',
             'desc' => get_field('description', $post->ID) ?: '',
             'link' => get_field('resource_link', $post->ID) ?: '#',
-            'prompt_text' => get_field('prompt_text', $post->ID) ?: ''
+            'prompt_text' => get_field('prompt_text', $post->ID) ?: '',
+            'topics' => !is_wp_error($topics) ? $topics : array()
         );
     }
 
     // Merge with JSON data
     $json_data = get_lab_data();
     if (!empty($json_data['resources'])) {
-        $resources = array_merge($resources, $json_data['resources']);
+        foreach ($json_data['resources'] as $resource) {
+            // Ensure topics field exists (use 'tags' from JSON if available)
+            if (!isset($resource['topics'])) {
+                $resource['topics'] = isset($resource['tags']) ? $resource['tags'] : array();
+            }
+            $resources[] = $resource;
+        }
     }
 
     return $resources;
@@ -139,8 +199,14 @@ add_shortcode('course_grid', function() {
 
     $output = '<div class="course-grid">';
     foreach ($sessions as $course) {
+        // Build data-tags attribute for filtering
+        $tags_attr = '';
+        if (!empty($course['topics']) && is_array($course['topics'])) {
+            $tags_attr = 'data-tags="' . esc_attr(implode(',', $course['topics'])) . '"';
+        }
+
         $output .= '
-        <div class="course-card">
+        <div class="course-card filterable-card" ' . $tags_attr . '>
             <span class="course-tag">SESSION</span>
             <a href="' . esc_url($course['url']) . '" target="_blank" class="course-link">' . esc_html($course['title']) . '</a>
             <p class="course-meta">' . esc_html($course['program']) . ' • ' . esc_html($course['institution']) . '</p>
@@ -178,8 +244,14 @@ add_shortcode('resource_grid', function() {
             $data_attrs = 'data-modal="gem" data-gem-link="' . esc_url($res['link']) . '" data-title="' . esc_attr($res['title']) . '"';
         }
 
+        // Build data-tags attribute for filtering
+        $tags_attr = '';
+        if (!empty($res['topics']) && is_array($res['topics'])) {
+            $tags_attr = 'data-tags="' . esc_attr(implode(',', $res['topics'])) . '"';
+        }
+
         $output .= '
-        <div class="course-card" ' . $data_attrs . '>
+        <div class="course-card filterable-card" ' . $data_attrs . ' ' . $tags_attr . '>
             <span class="course-tag">' . $icon . ' ' . esc_html($res['type']) . '</span>
             <div class="course-link">' . esc_html($res['title']) . '</div>
             <div class="course-footer">View Details →</div>
